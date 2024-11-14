@@ -82,9 +82,9 @@ public class Calculator {
         Label label = new Label(shell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY | SWT.CENTER);
 
         Font font = new Font(shell.getDisplay(), "system", 12, SWT.NORMAL);
-        errorBox.setFont(font);
+        label.setFont(font);
 
-        errorBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
+        label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 
         return label;
     }
