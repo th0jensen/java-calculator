@@ -92,27 +92,13 @@ public class Calculator {
     private void addToDisplay(String label) {
         errorBox.setText("");
 
-        if (isOperator(label)) {
-            if (!display.getText().isEmpty() && !containsOperator(display.getText())) {
+        if (Operator.isOperator(label)) {
+            if (!display.getText().isEmpty() && !Operator.containsOperator(display.getText())) {
                 display.setText(display.getText() + label);
             }
         } else {
             display.setText(display.getText() + label);
         }
-    }
-
-    private boolean isOperator(String label) {
-        for (Operator op : Operator.values()) {
-            if (op.getSymbol().equals(label)) { return true; }
-        }
-        return false;
-    }
-
-    private boolean containsOperator(String text) {
-        for (Operator op : Operator.values()) {
-            if (text.contains(op.getSymbol())) { return true; }
-        }
-        return false;
     }
 
     private void calculateSum(String input) {

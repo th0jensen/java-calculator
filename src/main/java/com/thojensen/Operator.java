@@ -49,4 +49,18 @@ public enum Operator {
         }
         throw new IllegalArgumentException("Invalid operator symbol: " + symbol);
     }
+
+    public static boolean isOperator(String label) {
+        for (Operator op : Operator.values()) {
+            if (op.getSymbol().equals(label)) { return true; }
+        }
+        return false;
+    }
+
+    public static boolean containsOperator(String text) {
+        for (Operator op : Operator.values()) {
+            if (text.contains(op.getSymbol())) { return true; }
+        }
+        return false;
+    }
 }
