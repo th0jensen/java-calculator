@@ -1,31 +1,34 @@
 package com.thojensen;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public enum Operator {
     ADDITION("+") {
         @Override
-        public String apply(String num1, String num2) {
-            return String.valueOf(Integer.parseInt(num1) + Integer.parseInt(num2));
+        public Double apply(String num1, String num2) {
+            return Double.parseDouble(num1) + Double.parseDouble(num2);
         }
     },
     SUBTRACTION("-") {
         @Override
-        public String apply(String num1, String num2) {
-            return String.valueOf(Integer.parseInt(num1) - Integer.parseInt(num2));
+        public Double apply(String num1, String num2) {
+            return Double.parseDouble(num1) - Double.parseDouble(num2);
         }
     },
-    MULTIPLICATION("*") {
+    MULTIPLICATION("x") {
         @Override
-        public String apply(String num1, String num2) {
-            return String.valueOf(Integer.parseInt(num1) * Integer.parseInt(num2));
+        public Double apply(String num1, String num2) {
+            return Double.parseDouble(num1) * Double.parseDouble(num2);
         }
     },
     DIVISION("/") {
         @Override
-        public String apply(String num1, String num2) {
-            if (Integer.parseInt(num2) == 0) {
-                return "Error: Division by zero";
+        public Double apply(String num1, String num2) {
+            if (Double.parseDouble(num2) == 0 || Double.parseDouble(num1) == 0) {
+                return 0.0;
             }
-            return String.valueOf(Integer.parseInt(num1) / Integer.parseInt(num2));
+            return Double.parseDouble(num1) / Double.parseDouble(num2);
         }
     };
 
@@ -39,7 +42,7 @@ public enum Operator {
         return symbol;
     }
 
-    public abstract String apply(String num1, String num2);
+    public abstract Double apply(String num1, String num2);
 
     public static Operator fromSymbol(String symbol) {
         for (Operator op : values()) {
@@ -62,5 +65,15 @@ public enum Operator {
             if (text.contains(op.getSymbol())) { return true; }
         }
         return false;
+    }
+
+    public static BigDecimal conditionalRound(double number) {
+        BigDecimal bd = new BigDecimal(Double.toString(number));
+
+        if (bd.stripTrailingZeros().scale() <= 0) {
+            return bd.setScale(0, RoundingMode.DOWN);
+        }
+
+        return bd.setScale(3, RoundingMode.DOWN).stripTrailingZeros();
     }
 }

@@ -6,16 +6,28 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import static com.thojensen.Evaluator.splitEquation;
+import static com.thojensen.Operator.conditionalRound;
+
 public class Calculator {
     private Shell shell;
     private Label display;
     private Label errorBox;
 
+    /**
+     * The main entrypoint of the application
+     * @param args Program initialisation arguments
+     */
     public static void main(String[] args) {
         Calculator calculator = new Calculator();
         calculator.open();
     }
 
+    /**
+     * Method to open and render the application.
+     * Takes no arguments and returns a GUI window.
+     * May fail if no window is allowed to open on the client.
+     */
     public void open() {
         Display display = new Display();
         shell = new Shell(display, SWT.CLOSE | SWT.TITLE | SWT.MIN);
@@ -23,6 +35,7 @@ public class Calculator {
         shell.setSize(300, 400);
 
         renderContent();
+        addKeyboardListener();
 
         shell.open();
         while (!shell.isDisposed()) {
@@ -33,16 +46,30 @@ public class Calculator {
         display.dispose();
     }
 
+    private void addKeyboardListener() {
+        shell.addListener(SWT.KeyDown, event -> {
+            char character = event.character;
+            if (Character.isDigit(character) || "+-x/.".indexOf(character) != -1) {
+                addToDisplay(String.valueOf(character));
+            } else if (character == SWT.CR || character == SWT.LF) {
+                calculateSum(this.display.getText());
+            } else if (character == SWT.BS) {
+                removeFromDisplay();
+            }
+        });
+    }
+
     private void renderContent() {
         shell.setLayout(new GridLayout(4, false));
         display = createDisplay();
         errorBox = createErrorBox();
 
         String[] buttonLabels = {
+                "C"     , "CE"    ,
                 "7", "8", "9", "/",
-                "4", "5", "6", "*",
+                "4", "5", "6", "x",
                 "1", "2", "3", "-",
-                "CE", "0", "=", "+"
+                ".", "0", "=", "+",
         };
 
         for (String label : buttonLabels) {
@@ -51,12 +78,19 @@ public class Calculator {
 
             button.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+            GridData topButtons = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+
             switch (label) {
                 case "=":
                     button.addListener(SWT.Selection, _ -> calculateSum(display.getText()));
                     break;
+                case "C":
+                    button.addListener(SWT.Selection, _ -> removeFromDisplay());
+                    button.setLayoutData(topButtons);
+                    break;
                 case "CE":
                     button.addListener(SWT.Selection, _ -> display.setText(""));
+                    button.setLayoutData(topButtons);
                     break;
                 default:
                     button.addListener(SWT.Selection, _ -> addToDisplay(label));
@@ -101,21 +135,29 @@ public class Calculator {
         }
     }
 
-    private void calculateSum(String input) {
-        String[] parts = input.split("(?<=\\d)(?=\\D)|(?<=\\D)(?=\\d)");
+    private void removeFromDisplay() {
+        errorBox.setText("");
 
+        String currentText = this.display.getText();
+        if (!currentText.isEmpty()) {
+            this.display.setText(currentText.substring(0, currentText.length() - 1));
+        }
+    }
+
+    private void calculateSum(String input) {
+        String[] parts = splitEquation(input);
         if (parts.length != 3) {
             errorBox.setText("Error: Invalid input");
             return;
         }
 
-        String num1 = parts[0].trim();
+        String leftOperand = parts[0].trim();
         String operatorSymbol = parts[1].trim();
-        String num2 = parts[2].trim();
+        String rightOperand = parts[2].trim();
 
         try {
             Operator operator = Operator.fromSymbol(operatorSymbol);
-            display.setText(operator.apply(num1, num2));
+            display.setText(conditionalRound(operator.apply(leftOperand, rightOperand)).toString());
         } catch (IllegalArgumentException e) {
             errorBox.setText("Error: Invalid operator");
         }
