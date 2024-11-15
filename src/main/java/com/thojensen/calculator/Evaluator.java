@@ -1,4 +1,4 @@
-package com.thojensen;
+package com.thojensen.calculator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ public class Evaluator {
 
     /**
      * Method that prepares equation for evaluation.
-     * @param input String
+     * @param input String::Equation
      * @return String[] of operands and operator
      */
     public static String[] splitEquation(String input) {

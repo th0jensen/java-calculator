@@ -1,4 +1,4 @@
-package com.thojensen;
+package com.thojensen.calculator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

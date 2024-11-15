@@ -4,18 +4,14 @@ plugins {
 }
 
 group = 'com.thojensen'
-version = '1.0-SNAPSHOT'
+version = '0.1.0'
 
 repositories {
     mavenCentral()
-    maven {
-        url 'https://repo.eclipse.org/content/groups/releases/'
-    }
+    maven { url 'https://repo.eclipse.org/content/groups/releases/' }
 }
 
-ext {
-    swtVersion = '3.122.0'
-}
+ext { swtVersion = '3.122.0' }
 
 def osgiPlatform = {
     def os = System.getProperty('os.name').toLowerCase()
@@ -32,7 +28,7 @@ def osgiPlatform = {
     }
 }()
 
-configurations.all {
+configurations.configureEach {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
         if (details.requested.group == 'org.eclipse.platform' && details.requested.name.startsWith('org.eclipse.swt')) {
             details.useTarget group: details.requested.group, name: "org.eclipse.swt.${osgiPlatform}", version: details.requested.version
@@ -46,8 +42,14 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
-application {
-    mainClass = 'com.thojensen.Calculator'
+application { mainClass = 'com.thojensen.launcher.Launcher' }
+
+tasks.register('calculator', JavaExec) {
+    mainClass = 'com.thojensen.calculator.Calculator'
+    classpath = sourceSets.main.runtimeClasspath
+    if (System.getProperty('os.name').toLowerCase().contains('mac')) {
+        jvmArgs = ['-XstartOnFirstThread']
+    }
 }
 
 run {
@@ -56,6 +58,4 @@ run {
     }
 }
 
-test {
-    useJUnitPlatform()
-}
+test { useJUnitPlatform() }

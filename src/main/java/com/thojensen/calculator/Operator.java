@@ -1,4 +1,4 @@
-package com.thojensen;
+package com.thojensen.calculator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

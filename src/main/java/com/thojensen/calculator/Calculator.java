@@ -1,4 +1,4 @@
-package com.thojensen;
+package com.thojensen.calculator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -6,21 +6,34 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import static com.thojensen.Evaluator.splitEquation;
-import static com.thojensen.Operator.conditionalRound;
+import java.util.Arrays;
+import java.util.List;
 
-public class Calculator {
+public class Calculator implements Runnable {
+    private static Display display;
     private Shell shell;
-    private Label display;
+    private Label calcDisplay;
     private Label errorBox;
+
+    @Override
+    public void run() {
+        open();
+    }
 
     /**
      * The main entrypoint of the application
      * @param args Program initialisation arguments
      */
     public static void main(String[] args) {
+        display = new Display();
         Calculator calculator = new Calculator();
-        calculator.open();
+        calculator.run();
+        while (!display.isDisposed()) {
+            if (!display.readAndDispatch()) {
+                display.sleep();
+            }
+        }
+        display.dispose();
     }
 
     /**
@@ -29,7 +42,6 @@ public class Calculator {
      * May fail if no window is allowed to open on the client.
      */
     public void open() {
-        Display display = new Display();
         shell = new Shell(display, SWT.CLOSE | SWT.TITLE | SWT.MIN);
         shell.setText("Calculator");
         shell.setSize(300, 400);
@@ -38,12 +50,6 @@ public class Calculator {
         addKeyboardListener();
 
         shell.open();
-        while (!shell.isDisposed()) {
-            if (!display.readAndDispatch()) {
-                display.sleep();
-            }
-        }
-        display.dispose();
     }
 
     private void addKeyboardListener() {
@@ -52,7 +58,7 @@ public class Calculator {
             if (Character.isDigit(character) || "+-x/.".indexOf(character) != -1) {
                 addToDisplay(String.valueOf(character));
             } else if (character == SWT.CR || character == SWT.LF) {
-                calculateSum(this.display.getText());
+                calculateSum(this.calcDisplay.getText());
             } else if (character == SWT.BS) {
                 removeFromDisplay();
             }
@@ -61,41 +67,42 @@ public class Calculator {
 
     private void renderContent() {
         shell.setLayout(new GridLayout(4, false));
-        display = createDisplay();
+        calcDisplay = createDisplay();
         errorBox = createErrorBox();
 
-        String[] buttonLabels = {
+        List<String> buttonLabels = Arrays.asList(
                 "C"     , "CE"    ,
                 "7", "8", "9", "/",
                 "4", "5", "6", "x",
                 "1", "2", "3", "-",
-                ".", "0", "=", "+",
-        };
+                ".", "0", "=", "+");
 
-        for (String label : buttonLabels) {
-            Button button = new Button(shell, SWT.PUSH);
-            button.setText(label);
+        buttonLabels.forEach(this::createButtons);
+    }
 
-            button.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    private void createButtons(String label) {
+        Button button = new Button(shell, SWT.PUSH);
+        button.setText(label);
 
-            GridData topButtons = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+        button.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-            switch (label) {
-                case "=":
-                    button.addListener(SWT.Selection, _ -> calculateSum(display.getText()));
-                    break;
-                case "C":
-                    button.addListener(SWT.Selection, _ -> removeFromDisplay());
-                    button.setLayoutData(topButtons);
-                    break;
-                case "CE":
-                    button.addListener(SWT.Selection, _ -> display.setText(""));
-                    button.setLayoutData(topButtons);
-                    break;
-                default:
-                    button.addListener(SWT.Selection, _ -> addToDisplay(label));
-                    break;
-            }
+        GridData topButtons = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+
+        switch (label) {
+            case "=":
+                button.addListener(SWT.Selection, _ -> calculateSum(calcDisplay.getText()));
+                break;
+            case "C":
+                button.addListener(SWT.Selection, _ -> removeFromDisplay());
+                button.setLayoutData(topButtons);
+                break;
+            case "CE":
+                button.addListener(SWT.Selection, _ -> calcDisplay.setText(""));
+                button.setLayoutData(topButtons);
+                break;
+            default:
+                button.addListener(SWT.Selection, _ -> addToDisplay(label));
+                break;
         }
     }
 
@@ -127,25 +134,25 @@ public class Calculator {
         errorBox.setText("");
 
         if (Operator.isOperator(label)) {
-            if (!display.getText().isEmpty() && !Operator.containsOperator(display.getText())) {
-                display.setText(display.getText() + label);
+            if (!calcDisplay.getText().isEmpty() && !Operator.containsOperator(calcDisplay.getText())) {
+                calcDisplay.setText(calcDisplay.getText() + label);
             }
         } else {
-            display.setText(display.getText() + label);
+            calcDisplay.setText(calcDisplay.getText() + label);
         }
     }
 
     private void removeFromDisplay() {
         errorBox.setText("");
 
-        String currentText = this.display.getText();
+        String currentText = this.calcDisplay.getText();
         if (!currentText.isEmpty()) {
-            this.display.setText(currentText.substring(0, currentText.length() - 1));
+            this.calcDisplay.setText(currentText.substring(0, currentText.length() - 1));
         }
     }
 
     private void calculateSum(String input) {
-        String[] parts = splitEquation(input);
+        String[] parts = Evaluator.splitEquation(input);
         if (parts.length != 3) {
             errorBox.setText("Error: Invalid input");
             return;
@@ -157,7 +164,7 @@ public class Calculator {
 
         try {
             Operator operator = Operator.fromSymbol(operatorSymbol);
-            display.setText(conditionalRound(operator.apply(leftOperand, rightOperand)).toString());
+            calcDisplay.setText(Operator.conditionalRound(operator.apply(leftOperand, rightOperand)).toString());
         } catch (IllegalArgumentException e) {
             errorBox.setText("Error: Invalid operator");
         }
