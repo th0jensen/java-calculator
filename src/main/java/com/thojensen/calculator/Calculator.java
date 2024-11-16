@@ -6,14 +6,20 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Calculator implements Runnable {
     private static Display display;
+    private static Shell parentShell;
     private Shell shell;
     private Label calcDisplay;
     private Label errorBox;
+
+    public Calculator(Shell parentShell) {
+        Calculator.parentShell = parentShell;
+    }
 
     @Override
     public void run() {
@@ -26,7 +32,7 @@ public class Calculator implements Runnable {
      */
     public static void main(String[] args) {
         display = new Display();
-        Calculator calculator = new Calculator();
+        Calculator calculator = new Calculator(parentShell);
         calculator.run();
         while (!display.isDisposed()) {
             if (!display.readAndDispatch()) {
@@ -42,7 +48,7 @@ public class Calculator implements Runnable {
      * May fail if no window is allowed to open on the client.
      */
     public void open() {
-        shell = new Shell(display, SWT.CLOSE | SWT.TITLE | SWT.MIN);
+        shell = new Shell(parentShell, SWT.CLOSE | SWT.MODELESS);
         shell.setText("Calculator");
         shell.setSize(300, 400);
 
@@ -50,13 +56,22 @@ public class Calculator implements Runnable {
         addKeyboardListener();
 
         shell.open();
+        while (!shell.isDisposed()) {
+            if (!shell.getDisplay().readAndDispatch()) {
+                shell.getDisplay().sleep();
+            }
+        }
     }
 
     private void addKeyboardListener() {
         shell.addListener(SWT.KeyDown, event -> {
             char character = event.character;
-            if (Character.isDigit(character) || "+-x/.".indexOf(character) != -1) {
-                addToDisplay(String.valueOf(character));
+            if (Character.isDigit(character) || "+-x*/.".indexOf(character) != -1) {
+                if (character == '*') {
+                    addToDisplay(String.valueOf('x'));
+                } else {
+                    addToDisplay(String.valueOf(character));
+                }
             } else if (character == SWT.CR || character == SWT.LF) {
                 calculateSum(this.calcDisplay.getText());
             } else if (character == SWT.BS) {
@@ -70,12 +85,13 @@ public class Calculator implements Runnable {
         calcDisplay = createDisplay();
         errorBox = createErrorBox();
 
-        List<String> buttonLabels = Arrays.asList(
+        ArrayList<String> buttonLabels = new ArrayList<>(Arrays.asList(
                 "C"     , "CE"    ,
                 "7", "8", "9", "/",
                 "4", "5", "6", "x",
                 "1", "2", "3", "-",
-                ".", "0", "=", "+");
+                ".", "0", "=", "+"
+        ));
 
         buttonLabels.forEach(this::createButtons);
     }

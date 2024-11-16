@@ -1,5 +1,8 @@
 package com.thojensen.calculator;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,7 +13,9 @@ class CalculatorTest {
 
     @BeforeEach
     void setUp() {
-        calculator = new Calculator();
+        Display display = new Display();
+        Shell shell = new Shell(display, SWT.MIN);
+        calculator = new Calculator(shell);
     }
 
     @Test

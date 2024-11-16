@@ -44,8 +44,54 @@ dependencies {
 
 application { mainClass = 'com.thojensen.launcher.Launcher' }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.thojensen.launcher.Launcher'
+    }
+}
+
+tasks.register('fatJar', Jar) {
+    archiveClassifier = 'fat'
+    from sourceSets.main.output
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'org/eclipse/swt/**'
+    manifest {
+        attributes 'Main-Class': 'com.thojensen.launcher.Launcher'
+    }
+}
+
+tasks.register('createDistributions', Zip) {
+    archiveFileName = "calculator-${version}-distributions.zip"
+    destinationDirectory = layout.buildDirectory.dir('distributions')
+
+    from(tasks.named('fatJar'))
+
+    ['win', 'mac', 'linux'].each { platform ->
+        from(configurations.runtimeClasspath) {
+            include "**/org.eclipse.swt.${platform}.${swtVersion}.jar"
+            rename { filename -> "lib/${platform}/${filename}" }
+        }
+    }
+
+    from('scripts') {
+        include "run_*.sh"
+        include "run_*.bat"
+        into 'scripts'
+    }
+}
+
 tasks.register('calculator', JavaExec) {
     mainClass = 'com.thojensen.calculator.Calculator'
+    classpath = sourceSets.main.runtimeClasspath
+    if (System.getProperty('os.name').toLowerCase().contains('mac')) {
+        jvmArgs = ['-XstartOnFirstThread']
+    }
+}
+
+tasks.register('snake', JavaExec) {
+    mainClass = 'com.thojensen.snake.SnakeGame'
     classpath = sourceSets.main.runtimeClasspath
     if (System.getProperty('os.name').toLowerCase().contains('mac')) {
         jvmArgs = ['-XstartOnFirstThread']
@@ -58,4 +104,9 @@ run {
     }
 }
 
-test { useJUnitPlatform() }
+test {
+    useJUnitPlatform()
+    if (System.getProperty('os.name').toLowerCase().contains('mac')) {
+        jvmArgs = ['-XstartOnFirstThread']
+    }
+}
