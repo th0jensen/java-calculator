@@ -8,26 +8,23 @@ public class Graphics {
     private static Shell shell;
     private Game game;
     private static final int CELL_SIZE = 20;
-    private static int fps = 120;
+    private static final int fps = 120;
     private Color snakeColor;
     private Color foodColor;
-    private Color backgroundColor;
-    private int score;
     private Font scoreFont;
-    private Button tryAgainButton;
-    private boolean isGameOver = false;
+    public Button tryAgainButton;
+    public boolean isGameOver = false;
 
     public Graphics(Shell shell) {
         Graphics.shell = shell;
-        this.score = 0;
         initializeGame();
         initializeColors();
     }
 
-    private void initializeGame() {
+    public void initializeGame() {
         Cell initPos = new Cell(5, 5);
         Snake initSnake = new Snake(initPos);
-        Board board = new Board(19, 20);
+        Board board = new Board(20, 20);
         game = new Game(initSnake, board);
         game.setDirection(Game.DIRECTION_NONE);
         game.setGameOver(false);
@@ -46,15 +43,12 @@ public class Graphics {
             Rectangle clientArea = shell.getClientArea();
             e.gc.fillRectangle(clientArea);
 
-            // Draw snake and food as before
             drawGameElements(e.gc);
 
-            // Draw score
             e.gc.setFont(scoreFont);
             String scoreText = "Score: " + (game.getSnake().getSnakeParts().size() - 1);
             e.gc.drawString(scoreText, 10, 10, true);
 
-            // Draw game over screen if game is over
             if (game.isGameOver()) {
                 drawGameOverScreen(e.gc, clientArea);
             }
@@ -62,7 +56,6 @@ public class Graphics {
 
         createTryAgainButton();
         
-        // Game loop remains the same
         Runnable gameLoop = new Runnable() {
             @Override
             public void run() {
@@ -97,7 +90,7 @@ public class Graphics {
         Cell[][] cells = game.getBoard().getCells();
         for (int i = 0; i < cells.length; i++) {
             for (int j = 0; j < cells[i].length; j++) {
-                if (cells[i][j].getCellType() == CellType.FOOD) {
+                if (cells[i][j].getCellType() == Cell.CellType.FOOD) {
                     gc.fillRectangle(
                         j * CELL_SIZE,
                         i * CELL_SIZE,
@@ -121,9 +114,9 @@ public class Graphics {
         gc.setFont(new Font(shell.getDisplay(), "system", 24, SWT.NORMAL));
         String gameOverText = "Game Over!";
         Point gameOverSize = gc.textExtent(gameOverText);
-        gc.drawText(gameOverText, 
-            (clientArea.width - gameOverSize.x) / 2,
-            (clientArea.height - gameOverSize.y) / 2 - 30,
+        gc.drawText(gameOverText,
+                (clientArea.width - gameOverSize.x) / 2,
+                (clientArea.height - gameOverSize.y) / 2 - 30,
             true);
 
         // Final score
@@ -148,7 +141,7 @@ public class Graphics {
             30
         );
 
-        tryAgainButton.addListener(SWT.Selection, e -> {
+        tryAgainButton.addListener(SWT.Selection, _ -> {
             isGameOver = false;
             tryAgainButton.setVisible(false);
             initializeGame();
@@ -162,7 +155,6 @@ public class Graphics {
     public void dispose() {
         snakeColor.dispose();
         foodColor.dispose();
-        backgroundColor.dispose();
         scoreFont.dispose();
         tryAgainButton.dispose();
     }

@@ -16,4 +16,10 @@ public class Cell {
     public void setCellType(CellType nuevo) {
         this.cellType = nuevo;
     }
+
+    public enum CellType {
+        EMPTY,
+        FOOD,
+        SNAKE_NODE
+    }
 }

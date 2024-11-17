@@ -9,21 +9,21 @@ public class Snake {
     public Snake (Cell initPos) {
         head = initPos;
         snakeParts.add(head);
-        head.setCellType(CellType.SNAKE_NODE);
+        head.setCellType(Cell.CellType.SNAKE_NODE);
     }
 
     public void grow() {
         Cell newCell = new Cell(head.getRow(), head.getCol());
-        newCell.setCellType(CellType.SNAKE_NODE);
+        newCell.setCellType(Cell.CellType.SNAKE_NODE);
         snakeParts.addFirst(newCell);
     }
 
     public void move(Cell nextCell) {
         Cell tail = snakeParts.removeLast();
-        tail.setCellType(CellType.EMPTY);
+        tail.setCellType(Cell.CellType.EMPTY);
 
         head = nextCell;
-        head.setCellType(CellType.SNAKE_NODE);
+        head.setCellType(Cell.CellType.SNAKE_NODE);
         snakeParts.addFirst(head);
     }
 
@@ -40,7 +40,5 @@ public class Snake {
     public LinkedList<Cell> getSnakeParts() {
         return snakeParts;
     }
-
     public Cell getHead() { return head; }
-    public void setHead(Cell head) { this.head = head; }
 }

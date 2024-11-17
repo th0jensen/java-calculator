@@ -1,11 +1,9 @@
 package com.thojensen.snake;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.*;
 
 public class SnakeGame implements Runnable {
-    private static Display display;
     private static Shell parentShell;
     private Shell shell;
     private Graphics graphics;
@@ -20,7 +18,7 @@ public class SnakeGame implements Runnable {
     }
 
     public static void main(String[] args) {
-        display = new Display();
+        Display display = new Display();
         SnakeGame snake = new SnakeGame(parentShell);
         snake.run();
         while (!display.isDisposed()) {
@@ -34,7 +32,7 @@ public class SnakeGame implements Runnable {
     public void open() {
         shell = new Shell(parentShell, SWT.CLOSE | SWT.MODELESS);
         shell.setText("Snake");
-        shell.setSize(400, 400);
+        shell.setSize(400, 428);
 
         graphics = new Graphics(shell);
         graphics.start();
@@ -54,35 +52,43 @@ public class SnakeGame implements Runnable {
         shell.addListener(SWT.KeyDown, e -> {
             Game game = graphics.getGame();
             switch (e.keyCode) {
-                case SWT.ARROW_UP:
-                case 'W':
                 case 'w':
+                case 'W':
+                case SWT.ARROW_UP:
                     if (game.getDirection() != Game.DIRECTION_DOWN) {
                         game.setDirection(Game.DIRECTION_UP);
                     }
                     break;
-                case SWT.ARROW_LEFT:
-                case 'A':
                 case 'a':
+                case 'A':
+                case SWT.ARROW_LEFT:
                     if (game.getDirection() != Game.DIRECTION_RIGHT) {
                         game.setDirection(Game.DIRECTION_LEFT);
                     }
                     break;
-                case SWT.ARROW_DOWN:
-                case 'S':
                 case 's':
+                case 'S':
+                case SWT.ARROW_DOWN:
                     if (game.getDirection() != Game.DIRECTION_UP) {
                         game.setDirection(Game.DIRECTION_DOWN);
                     }
                     break;
-                case SWT.ARROW_RIGHT:
-                case 'D':
                 case 'd':
+                case 'D':
+                case SWT.ARROW_RIGHT:
                     if (game.getDirection() != Game.DIRECTION_LEFT) {
                         game.setDirection(Game.DIRECTION_RIGHT);
                     }
                     break;
-
+                case SWT.CR:
+                case SWT.LF:
+                case SWT.TAB:
+                    if (game.isGameOver()) {
+                        graphics.isGameOver = false;
+                        graphics.tryAgainButton.setVisible(false);
+                        graphics.initializeGame();
+                    }
+                    break;
             }
         });
     }

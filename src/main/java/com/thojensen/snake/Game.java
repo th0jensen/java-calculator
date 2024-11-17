@@ -2,12 +2,11 @@ package com.thojensen.snake;
 
 public class Game {
 
-    public static final int DIRECTION_NONE
-            = 0,
+    public static final int DIRECTION_NONE = 0,
             DIRECTION_RIGHT = 1, DIRECTION_LEFT = -1,
             DIRECTION_UP = 2, DIRECTION_DOWN = -2;
-    private Snake snake;
-    private Board board;
+    private final Snake snake;
+    private final Board board;
     private int direction;
     private boolean gameOver;
 
@@ -17,25 +16,14 @@ public class Game {
     }
 
     public Snake getSnake() { return snake; }
-
-    public void setSnake(Snake snake) {
-        this.snake = snake;
-    }
-
     public Board getBoard() { return board; }
 
-    public void setBoard(Board board) {
-        this.board = board;
-    }
-
     public boolean isGameOver() { return gameOver; }
-
     public void setGameOver(boolean gameOver) {
         this.gameOver = gameOver;
     }
 
     public int getDirection() { return direction; }
-
     public void setDirection(int direction) {
         this.direction = direction;
     }
@@ -51,7 +39,7 @@ public class Game {
                     gameOver = true;
                 }
                 else {
-                    boolean wasFood = nextCell.getCellType() == CellType.FOOD;
+                    boolean wasFood = nextCell.getCellType() == Cell.CellType.FOOD;
                     
                     if (wasFood) {
                         snake.grow();
